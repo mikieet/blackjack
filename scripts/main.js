@@ -6,37 +6,37 @@
 var deck = [
   	{
     id: "A5",
-    suit: "Ace", 
+    suit: "A", 
     card: "5", 
     value: 5
   },
 {
     id: "A6",
-    suit: "Ace", 
+    suit: "A", 
     card: "6", 
     value: 6
   },
 {
     id: "A7",
-    suit: "Ace", 
+    suit: "A", 
     card: "7", 
     value: 7
   },
 {
     id: "A8",
-    suit: "Ace", 
+    suit: "A", 
     card: "8", 
     value: 8
   },
 {
     id: "A9",
-    suit: "Ace", 
+    suit: "A", 
     card: "9", 
     value: 9
   },
 {
     id: "A10",
-    suit: "Ace", 
+    suit: "A", 
     card: "10", 
     value: 10
   }
@@ -45,79 +45,180 @@ var deck = [
 
 $(function(){
 
+// set objects to hold cards
+
 var playersHand = []
 var dealersHand = []
-// var random = Math.floor((Math.random() * deck.length))
-var random = Math.floor((Math.random() * 10))
+var deckSize = deck.length 
+var playersScore = null
+var dealersScore = null
 
 // select card
-  function dealCard(player){
-  	var card = deck[random];
+function dealCard(player){
+  random = Math.floor((Math.random() * deckSize) + 1)
+  
+  card = deck[random];
 
-    // deck.splice(random,1)
-    player.push(random)
-    
-    // console.log(deck)
-    // console.log(playersHand)
-  }
+  player.push(card)
 
-  function firstDeal(){
-    dealCard(playersHand);
-    dealCard(dealersHand);
-    dealCard(playersHand);
-    dealCard(dealersHand);
 
-  }
+  displayCards(playersHand);
+  deckSize = deckSize - 1
+}
 
-  function handValid(score){
+function dealForDealer(player){
+  calculateScore(player)
+}
 
-  }
+function firstDeal(){
+  dealCard(playersHand);
+  dealCard(dealersHand);    
+  dealCard(playersHand);
+  dealCard(dealersHand);
+
+}
+
+
 
 // generate dealers hand
 
 // generate players hand
   
 	// calculate total score
-  function calculateScore(player) {
-    var score = 0
-    for (var i = player.length - 1; i >= 0; i--) {
-      score += player[i]
-    }
-    if (score > 21){
-      // bust();
-      // showDealersHand();
-      console.log('Stop!')
+var score = null
 
-    } else if (player.length == 5) {
-      console.log("!!! WINNER !!!")
+function calculateScore(player) {
+  
+  var score = 0
+  for (var i = player.length - 1; i >= 0; i--) {
+    score += player[i].value
+  
+    checkScore(player, score);
+    displayResult(player, score)
+  }
+}
 
-    } else {
-      console.log('carry on!')
-    }
-    
-    console.log(score)
+function checkScore(player, score){
+  if (score > 21){
+    bust();
+    dealForDealer();
+    console.log('Stop!')
+
+  } else if (player.length == 5) {
+    console.log("!!! WINNER !!!")
+    playerWinMessage()
+
+  } else if (score < 21){
+    console.log('carry on!')    
+  }
+}
+
+function displayResult(player, score){
+  if (player === playersHand){
+    $("#total-score").html(score)
+    var playersScore = score
+
+  } else if (player === dealersHand){
+    $("#dealer-score").html(score)
+    var dealersScore = score
+  }
+  
+}
+  
+function defineWinner(){
+  finalScorePlayer = $("#total-score").html()
+  finalScoreDealer = $("#dealer-score").html()
+
+  if (finalScorePlayer > finalScoreDealer && finalScorePlayer < 22 ){
+    playerWinMessage();
+  } else {
+    dealerWinMessage();
+  }
+  
+}
+  
+// DEALERS MECHANISM  
+
+// function dealForDealer(){
+//   console.log("this is calculating the dealer")
+  
+//   while (score < 17) {
+//     dealCard(dealersHand);
+//     displayCards(playersHand)
+//     calculateScore(dealersHand);
+
+//     // validateScore(dealersHand);
+//     console.log('saafsadsadsadasdasdassa')
+//     console.log(dealersHand)
+
+//   } 
+// }
+
+// DISPLAY PLAYERS CARDS
+
+function displayCards(playersHand){
+  var showCard = ''
+  for (var i = playersHand.length - 1; i >= 0; i--) {
+    showCard += ('<li>' + playersHand[i].suit + playersHand[i].card + '</li>') 
+  }
+    showHands = $("#players-cards").html(showCard)
+
+}
+
+// DISPLAY DEALERS CARDS
+
+function displayDealersCards(dealersHand){
+  var showCard = ''
+
+  for (var i = dealersHand.length - 1; i >= 0; i--) {
+    showCard += ('<li>' + dealersHand[i].suit + dealersHand[i].card + '</li>') 
   }
 
+    showHands = $("#dealers-cards").html(showCard)
 
-// on click 'hit'
+}
+
+//USER ACTIONS
 
   $("#deal").on('click', function(){
 
     firstDeal();
     calculateScore(playersHand);
-    console.log("player = " + playersHand)  
-    console.log("dealer = " + dealersHand)  
+
   })
 
   $("#hit").on('click', function(){
-    var random = Math.floor((Math.random() * 52) + 1)
 
     dealCard(playersHand);
-    handValid()
-    calculateScore(playersHand)
-    console.log("player = " + playersHand)  
+    calculateScore(playersHand);
+
   })
-})
+
+  $("#stick").on('click', function(){
+    
+    displayDealersCards(dealersHand);
+    calculateScore(dealersHand);
+    defineWinner();
+
+  })
+
+
+  // DISPLAY OUTCOMES
+
+  function bust(){
+    $("#outcome").html("YOU'RE BUST!!!")
+  }
+
+  function playerWinMessage(){
+    $("#outcome").html("YOU WIN!!!")
+  }
+
+  function dealerWinMessage(){
+    $("#outcome").html("YOU LOSE!!!")
+  }
+
+
+});
 	// generate new card
 
 	// append new card to players hand
