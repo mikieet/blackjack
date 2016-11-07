@@ -1,50 +1,10 @@
-// add object of all cards
-
-// var deck = [A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A12,A13,A14,C1,C2,C3,C4,C5,C6,C7,C8,C9,C10,C12,C13,C14,H1,H2,H3,H4,H5,H6,H7,H8,H9,H10,H12,H13,H14,D1,D2,D3,D4,D5,D6,D7,D8,D9,D10,D12,D13,D14]
-
-
-var deck = [
-  	{
-    id: "A5",
-    suit: "A", 
-    card: "5", 
-    value: 5
-  },
-{
-    id: "A6",
-    suit: "A", 
-    card: "6", 
-    value: 6
-  },
-{
-    id: "A7",
-    suit: "A", 
-    card: "7", 
-    value: 7
-  },
-{
-    id: "A8",
-    suit: "A", 
-    card: "8", 
-    value: 8
-  },
-{
-    id: "A9",
-    suit: "A", 
-    card: "9", 
-    value: 9
-  },
-{
-    id: "A10",
-    suit: "A", 
-    card: "10", 
-    value: 10
-  }
-]
 
 
 $(function(){
-
+  // var source = $("#my-template").html()
+  // var template = Handlebars.compile(source);
+  // $("body").append(template(deck));
+console.log(deck.length)
 // set objects to hold cards
 
 var playersHand = []
@@ -53,13 +13,26 @@ var deckSize = deck.length
 var playersScore = null
 var dealersScore = null
 
+function reDeal(player){
+  console.log(player)
+  for (var i = player.length - 1; i >= 0; i--) {
+    deck.push(player[i])
+    player.splice([i], 1)
+  }
+
+
+}
+
+
 // select card
 function dealCard(player){
+
   random = Math.floor((Math.random() * deckSize) + 1)
   
   card = deck[random];
 
   player.push(card)
+  deck.splice(random, 1)
 
 
   displayCards(playersHand);
@@ -92,16 +65,16 @@ function calculateScore(player) {
   var score = 0
   for (var i = player.length - 1; i >= 0; i--) {
     score += player[i].value
+    console.log(score)
   
     checkScore(player, score);
     displayResult(player, score)
-  }
+  } 
 }
 
 function checkScore(player, score){
   if (score > 21){
     bust();
-    dealForDealer();
     console.log('Stop!')
 
   } else if (player.length == 5) {
@@ -137,32 +110,20 @@ function defineWinner(){
   
 }
   
-// DEALERS MECHANISM  
 
-// function dealForDealer(){
-//   console.log("this is calculating the dealer")
-  
-//   while (score < 17) {
-//     dealCard(dealersHand);
-//     displayCards(playersHand)
-//     calculateScore(dealersHand);
-
-//     // validateScore(dealersHand);
-//     console.log('saafsadsadsadasdasdassa')
-//     console.log(dealersHand)
-
-//   } 
-// }
 
 // DISPLAY PLAYERS CARDS
+
+//time delay
+
 
 function displayCards(playersHand){
   var showCard = ''
   for (var i = playersHand.length - 1; i >= 0; i--) {
-    showCard += ('<li>' + playersHand[i].suit + playersHand[i].card + '</li>') 
+    showCard += ('<li>' + playersHand[i].card + playersHand[i].suit + '</li>') 
   }
     showHands = $("#players-cards").html(showCard)
-
+  // $("#players-cards").append(template({playingCard: playersHand}));
 }
 
 // DISPLAY DEALERS CARDS
@@ -171,7 +132,7 @@ function displayDealersCards(dealersHand){
   var showCard = ''
 
   for (var i = dealersHand.length - 1; i >= 0; i--) {
-    showCard += ('<li>' + dealersHand[i].suit + dealersHand[i].card + '</li>') 
+    showCard += ('<li>' + dealersHand[i].card + dealersHand[i].suit + '</li>') 
   }
 
     showHands = $("#dealers-cards").html(showCard)
@@ -181,27 +142,46 @@ function displayDealersCards(dealersHand){
 //USER ACTIONS
 
   $("#deal").on('click', function(){
-
+    // move all cards from playersHand and dealersHand back to deck
+    reDeal(playersHand);
+    reDeal(dealersHand);
     firstDeal();
     calculateScore(playersHand);
 
   })
 
   $("#hit").on('click', function(){
-
-    dealCard(playersHand);
+    dealCard(playersHand)
     calculateScore(playersHand);
 
   })
 
   $("#stick").on('click', function(){
     
-    displayDealersCards(dealersHand);
     calculateScore(dealersHand);
+    displayDealersCards(dealersHand);
+    dealToDealer();
     defineWinner();
 
   })
 
+  function dealToDealer(){
+    console.log("adssada")
+  
+    var dealerScore = $("#dealer-score").html()
+    dealerScore = parseInt(dealerScore, 10)
+
+    if (dealerScore < 17){
+
+      dealCard(dealersHand);    
+      displayDealersCards(dealersHand)
+      calculateScore(dealersHand);
+      dealToDealer()
+
+    } else {
+      console.log("dealserStops")
+    }
+  }
 
   // DISPLAY OUTCOMES
 
